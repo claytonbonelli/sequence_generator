@@ -9,36 +9,35 @@ Other numbers of larger quantities also follow the same order of formation, ie a
 AA-0001
 AA-0002
 AA-0003
-etc
+
 AA-9999
 AB-0001
 AB-0002
 AB-0003
-etc
+
 AB-9999
 AC-0001
 AC-0002
 AC-0003
-etc
+
 AC-9999
 AD-0001
 AD-0002
 AD-0003
-etc
+
 
 Other sequence
 A-2019-01
 A-2019-02
 A-2019-03
-etc
+
 A-2019-99
 B-2019-01
 B-2019-02
-etc
+
 B-2019-99
 C-2019-01
 C-2019-02
-etc
 ```
 
 How to create growing sequences but made up of characters made up of letters, numbers, punctuation marks, etc.? For this kind of need it is that the "sequence" package was created which contains classes and the means that allow the definition of a sequence of alphanumeric values and the generation these values in ascending / descending sequential order.
@@ -51,7 +50,9 @@ Example:
 
 ```python
 s = Sequences([DnaSequence(), '-', DnaSequence(), '-', DnaSequence()])
+
 while s.next().get() != 'AAA-AAC-GTA':
     print(s.get())
+    
 print(s.get())
 ```
