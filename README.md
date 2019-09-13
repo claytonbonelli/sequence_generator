@@ -57,6 +57,12 @@ s = Sequences([TwoAlphabeticalSequence(), '-', FourDecimalSequence()])
 for x in range(100):
     print(s.get())
 
+
+s = Sequences([AlphabeticalSequence(), '-', '2019', '-', TwoDecimalSequence()])
+for x in range(100):
+    print(s.get())
+
+
 s = Sequences([DnaSequence(), '-', DnaSequence(), '-', DnaSequence()])
 while s.next().get() != 'AAA-AAC-GTA':
     print(s.get())
