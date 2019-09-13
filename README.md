@@ -53,8 +53,11 @@ You can create your own sequences or use the predefined ones.
 Example:
 
 ```python
-s = Sequences([DnaSequence(), '-', DnaSequence(), '-', DnaSequence()])
+s = Sequences([TwoAlphabeticalSequence(), '-', FourDecimalSequence()])
+for x in range(100):
+    print(s.get())
 
+s = Sequences([DnaSequence(), '-', DnaSequence(), '-', DnaSequence()])
 while s.next().get() != 'AAA-AAC-GTA':
     print(s.get())
     
