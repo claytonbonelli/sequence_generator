@@ -22,6 +22,8 @@ class Sequence:
             if v == old:
                 raise Exception("Impossible to set the value")
 
+    def previous(self):
+        pass
 
     def get(self):
         if self.index == -1:
