@@ -65,7 +65,6 @@ for x in range(100):
 
 s = Sequences([DnaSequence(), '-', DnaSequence(), '-', DnaSequence()])
 while s.next().get() != 'AAA-AAC-GTA':
-    print(s.get())
-    
+    print(s.get())    
 print(s.get())
 ```
