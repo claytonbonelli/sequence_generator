@@ -1,5 +1,6 @@
 # Sequence Generator
 
+## By Clayton Boneli
 
 Number or letter sequences are easy to obtain when you are only interested in sequence of numbers (ascending or descending) that follow
 a predefined order, for example decimal numbers 0,1,2,3,4,5,6,7,8,9 always follow that order, the number 1 will follow the number 0, the number 3 will follow the number 2.
