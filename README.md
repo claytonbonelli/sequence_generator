@@ -55,12 +55,12 @@ Example:
 ```python
 s = Sequences([TwoAlphabeticalSequence(), '-', FourDecimalSequence()])
 for x in range(100):
-    print(s.get())
+    print(s.next().get())
 
 
 s = Sequences([AlphabeticalSequence(), '-', '2019', '-', TwoDecimalSequence()])
 for x in range(100):
-    print(s.get())
+    print(s.next().get())
 
 
 s = Sequences([DnaSequence(), '-', DnaSequence(), '-', DnaSequence()])
