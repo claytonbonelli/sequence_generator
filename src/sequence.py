@@ -77,6 +77,9 @@ class Sequences(Sequence):
                 result += value
         return result
 
+    def previous(self):
+        pass
+
     def next(self):
         if len(self.indexes) > 0:
             self.sequence[self.indexes[-1]].next()
