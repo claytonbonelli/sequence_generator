@@ -57,7 +57,7 @@ class Sequences(Sequence):
     def send(self, *args, **kwargs):
         if len(self.indexes) <= 0:
             return
-
+        
         sequence = args[0]
         for index, idx in enumerate(self.indexes):
             if self.sequence[idx] != sequence:
