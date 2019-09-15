@@ -75,3 +75,6 @@ if seq is not None:
     for x in range(100):
         print(seq.next().get())
 ```
+
+### Dependencies:
+   * exrex
