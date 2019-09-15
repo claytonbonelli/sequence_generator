@@ -1,3 +1,6 @@
+import exrex
+
+
 class Sequence:
     def __init__(self, sequence, parent=None):
         self.sequence = sequence
@@ -221,3 +224,24 @@ class DnaSequence(Sequences):
             Sequence('ACGT'),
             Sequence('ACGT'),
         ])
+
+
+def factory(pattern):
+    if pattern is None:
+        return None
+
+    pat = pattern.split(";")
+    if len(pat) <= 0:
+        return None
+
+    seq = []
+    for x in pat:
+        o = list(exrex.generate(x))
+        n = len(o)
+        if n == 1 and len(o[0]) > 0:
+            seq.append(o[0])
+        elif n > 1 and len("".join(o)) > 0:
+            seq.append(Sequence("".join(o)))
+    if len(seq) > 0:
+        return Sequences(seq)
+    return None
