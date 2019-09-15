@@ -78,3 +78,11 @@ if seq is not None:
 
 ### Dependencies:
    * exrex
+
+
+### Methods:
+   * next: advance to the next sequence
+   * get: return the current sequence's value
+   * set: set the current sequence's value
+   * previous: return to the previous sequence
+   * factory: create a sequence using regex 
