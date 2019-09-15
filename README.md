@@ -68,4 +68,10 @@ s = Sequences([DnaSequence(), '-', DnaSequence(), '-', DnaSequence()])
 while s.next().get() != 'AAA-AAC-GTA':
     print(s.get())    
 print(s.get())
+
+
+seq = factory("WM;[0-9];[0-9]")
+if seq is not None:
+    for x in range(100):
+        print(seq.next().get())
 ```
