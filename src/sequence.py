@@ -11,6 +11,9 @@ class Sequence:
     the sequence, and each of the characters entered will be returned at each execution of the "next" and "get" methods.
     When all characters have been returned, a next execution of the "next" and "get" methods will restart the sequence.
     """
+    OVERFLOW = 0
+    UNDERFLOW = 1
+
     def __init__(self, sequence, parent=None):
         self.sequence = sequence
         self.index = -1
@@ -22,12 +25,12 @@ class Sequence:
         """
         raise NotImplemented()
 
-    def send_to_parent(self):
+    def send_to_parent(self, *args, **kwargs):
         """
         Send a message for the parent.
         """
         if self.parent:
-            self.parent.send(self)
+            self.parent.send(self, *args, **kwargs)
 
     def set(self, value):
         """
@@ -44,9 +47,6 @@ class Sequence:
             if v == old:
                 raise Exception("Impossible to set the value")
 
-    def previous(self):
-        raise NotImplemented()
-
     def get(self):
         """
         :return: the current sequence's value.
@@ -55,18 +55,29 @@ class Sequence:
             self.index = 0
         return self.sequence[self.index]
 
+    def previous(self):
+        """
+        Return to the previous sequence.
+        :return: self
+        """
+        self.index -= 1
+        size = len(self.sequence)
+        if self.index >= 0:
+            return self
+        self.index = size - 1
+        self.send_to_parent(flow=self.UNDERFLOW)
+        return self
+
     def next(self):
         """
-        Advance for the next sequence.
+        Advance to the next sequence.
         :return: self
         """
         self.index += 1
         if self.index < len(self.sequence):
             return self
-
-        # Overflow
         self.index = 0
-        self.send_to_parent()
+        self.send_to_parent(flow=self.OVERFLOW)
         return self
 
 
@@ -108,20 +119,29 @@ class Sequences(Sequence):
             self.indexes.append(index)
 
     def send(self, *args, **kwargs):
-        if len(self.indexes) <= 0:
+        size = len(self.indexes)
+        if size <= 0:
             return
-        
+
+        flow = kwargs.get('flow')
         sequence = args[0]
         for index, idx in enumerate(self.indexes):
             if self.sequence[idx] != sequence:
                 continue
 
-            if index > 0:
-                self.sequence[self.indexes[index - 1]].next()
-                return
+            if flow == self.OVERFLOW:
+                if index > 0:
+                    self.sequence[self.indexes[index - 1]].next()
+                    return
+                # index == 0
+                self.send_to_parent(flow=flow)
 
-            # index == 0
-            self.send_to_parent()
+            elif flow == self.UNDERFLOW:
+                if index < size - 1:
+                    self.sequence[self.indexes[index + 1]].previous()
+                    return
+                # index == size
+                self.send_to_parent(flow=flow)
             return
 
     def get(self):
@@ -134,7 +154,9 @@ class Sequences(Sequence):
         return result
 
     def previous(self):
-        raise NotImplemented()
+        if len(self.indexes) > 0:
+            self.sequence[self.indexes[-1]].previous()
+        return self
 
     def next(self):
         if len(self.indexes) > 0:
