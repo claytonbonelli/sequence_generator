@@ -71,9 +71,8 @@ print(s.get())
 
 
 seq = factory("WM;[0-9];[0-9]")
-if seq is not None:
-    for x in range(100):
-        print(seq.next().get())
+for x in range(100):
+    print(seq.next().get())
 ```
 
 ### Dependencies:
