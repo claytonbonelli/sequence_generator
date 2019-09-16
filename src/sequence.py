@@ -112,6 +112,11 @@ class Sequences(Sequence):
     def __init__(self, sequence, parent=None):
         super().__init__(sequence, parent)
         self.indexes = []
+        self.build_indexes()
+
+    def build_indexes(self):
+        if self.sequence is None or len(self.sequence) <= 0:
+            return
         for index, value in enumerate(self.sequence):
             if not isinstance(value, Sequence):
                 continue
@@ -334,14 +339,23 @@ def factory(pattern):
     if len(pat) <= 0:
         return None
 
-    seq = []
+    result = Sequences([])
     for x in pat:
         o = list(exrex.generate(x))
         n = len(o)
         if n == 1 and len(o[0]) > 0:
-            seq.append(o[0])
-        elif n > 1 and len("".join(o)) > 0:
-            seq.append(Sequence("".join(o)))
-    if len(seq) > 0:
-        return Sequences(seq)
+            result.sequence.append(o[0])
+        elif n > 1 and len(o[0]) == 1:
+            result.sequence.append(Sequence("".join(o)))
+        elif n > 1 and len(o[0]) > 1:
+            for x in range(len(o[0])):
+                aux = []
+                for idx in range(len(o)):
+                    if o[idx][x] not in aux:
+                        aux.append(o[idx][x])
+                if len(aux) > 0:
+                    result.sequence.append(Sequence("".join(aux)))
+    if len(result.sequence) > 0:
+        result.build_indexes()
+        return result
     return None

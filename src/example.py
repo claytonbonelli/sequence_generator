@@ -40,3 +40,8 @@ print("\nPattern with previous")
 seq = factory(r"WM;-;[0-9];[0-9]")
 for x in range(100):
     print(seq.previous().get())
+
+print("\nOther pattern")
+seq = factory(r"WM-;[0-9]{4}")
+for x in range(100):
+    print(seq.next().get())
