@@ -130,22 +130,25 @@ class Sequences(Sequence):
 
         flow = kwargs.get('flow')
         sequence = args[0]
-        for index, idx in enumerate(self.indexes):
-            if self.sequence[idx] != sequence:
-                continue
 
-            if flow == self.OVERFLOW:
+        if flow == self.OVERFLOW:
+            for index, idx in enumerate(self.indexes):
+                if self.sequence[idx] != sequence:
+                    continue
                 if index > 0:
                     self.sequence[self.indexes[index - 1]].next()
                     return
                 # index == 0
                 self.send_to_parent(flow=flow)
 
-            elif flow == self.UNDERFLOW:
-                if index < size - 1:
-                    self.sequence[self.indexes[index + 1]].previous()
+        elif flow == self.UNDERFLOW:
+            for index, idx in enumerate(self.indexes):
+                if self.sequence[idx] != sequence:
+                    continue
+                if index > 0:
+                    self.sequence[self.indexes[index - 1]].previous()
                     return
-                # index == size
+                # index == 0
                 self.send_to_parent(flow=flow)
             return
 
