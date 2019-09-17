@@ -80,8 +80,10 @@ for x in range(100):
 
 
 ### Methods:
-   * next: advance to the next sequence
-   * get: return the current sequence's value
-   * set: set the current sequence's value
    * previous: return to the previous sequence
+   * next: advance to the next sequence
+   * last: advance to the last sequence
+   * first: return to the first sequence
+   * get: return the current sequence's value
+   * set: set the current sequence's value   
    * factory: create a sequence using regex 
