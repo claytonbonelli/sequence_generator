@@ -13,6 +13,7 @@ class Sequence:
     """
     OVERFLOW = 0
     UNDERFLOW = 1
+    LAST = 2
 
     def __init__(self, sequence, parent=None):
         self.sequence = sequence
@@ -22,28 +23,48 @@ class Sequence:
     def send(self, *args, **kwargs):
         """
         Send a message for this class.
+        :return: self
         """
-        raise NotImplemented()
+        return self
+
+    def last(self):
+        """
+        Advance to the last sequence.
+        :return: self
+        """
+        self.index = len(self.sequence) - 1
+        return self
+
+    def first(self):
+        """
+        Return to the first sequence.
+        :return: self
+        """
+        self.index = 0
+        return self
 
     def send_to_parent(self, *args, **kwargs):
         """
         Send a message for the parent.
+        :return: self
         """
         if self.parent:
             self.parent.send(self, *args, **kwargs)
+        return self
 
     def set(self, value):
         """
         Set the current sequence.
         :param value: the next sequence.
+        :return: self
         """
         old = self.get()
         if old == value:
-            return
+            return self
         while True:
             v = self.next().get()
             if v == value:
-                return
+                return self
             if v == old:
                 raise Exception("Impossible to set the value")
 
@@ -114,6 +135,26 @@ class Sequences(Sequence):
         self.indexes = []
         self.build_indexes()
 
+    def last(self):
+        """
+        Advance to the last sequence.
+        :return: self
+        """
+        self.index = len(self.sequence) - 1
+        for index, idx in enumerate(self.indexes):
+            self.sequence[idx].last()
+        return self
+
+    def first(self):
+        """
+        Return to the first sequence.
+        :return: self
+        """
+        self.index = 0
+        for index, idx in enumerate(self.indexes):
+            self.sequence[idx].first()
+        return self
+
     def build_indexes(self):
         if self.sequence is None or len(self.sequence) <= 0:
             return
@@ -124,9 +165,13 @@ class Sequences(Sequence):
             self.indexes.append(index)
 
     def send(self, *args, **kwargs):
+        """
+        Send a message for this class.
+        :return: self
+        """
         size = len(self.indexes)
         if size <= 0:
-            return
+            return self
 
         flow = kwargs.get('flow')
         sequence = args[0]
@@ -137,7 +182,7 @@ class Sequences(Sequence):
                     continue
                 if index > 0:
                     self.sequence[self.indexes[index - 1]].next()
-                    return
+                    return self
                 # index == 0
                 self.send_to_parent(flow=flow)
 
@@ -147,12 +192,15 @@ class Sequences(Sequence):
                     continue
                 if index > 0:
                     self.sequence[self.indexes[index - 1]].previous()
-                    return
+                    return self
                 # index == 0
                 self.send_to_parent(flow=flow)
-            return
+        return self
 
     def get(self):
+        """
+        :return: the current sequence's value.
+        """
         result = ''
         for value in self.sequence:
             if isinstance(value, Sequence):
@@ -162,11 +210,19 @@ class Sequences(Sequence):
         return result
 
     def previous(self):
+        """
+        Return to the previous sequence.
+        :return: self
+        """
         if len(self.indexes) > 0:
             self.sequence[self.indexes[-1]].previous()
         return self
 
     def next(self):
+        """
+        Advance to the next sequence.
+        :return: self
+        """
         if len(self.indexes) > 0:
             self.sequence[self.indexes[-1]].next()
         return self
