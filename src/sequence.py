@@ -13,7 +13,6 @@ class Sequence:
     """
     OVERFLOW = 0
     UNDERFLOW = 1
-    LAST = 2
 
     def __init__(self, sequence, parent=None):
         self.sequence = sequence
