@@ -364,7 +364,7 @@ class DnaSequence(Sequences):
         ])
 
 
-def factory(pattern):
+def factory(pattern, first_value=None):
     """
     Creates a sequence pattern using a string consisting of constants and regular expressions to represent the sequence
     of values. To create a sequence with the following pattern (including the constant "2019"):
@@ -388,6 +388,7 @@ def factory(pattern):
     s = factory ("[A-Z];-2019-;[0-9];[0-9]")
 
     :param pattern: the pattern to create the sequence.
+    :param first_value: the first value fo the sequence.
     :return: the instance of the class Sequences.
     """
     if pattern is None:
@@ -413,7 +414,13 @@ def factory(pattern):
                         aux.append(o[idx][x])
                 if len(aux) > 0:
                     result.sequence.append(Sequence("".join(aux)))
-    if len(result.sequence) > 0:
-        result.build_indexes()
-        return result
-    return None
+    if len(result.sequence) <= 0:
+        return None
+
+    result.build_indexes()
+
+    if first_value is not None:
+        result.set(first_value)
+        result.previous()
+
+    return result
