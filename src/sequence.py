@@ -134,6 +134,32 @@ class Sequences(Sequence):
         self.indexes = []
         self.build_indexes()
 
+    def get_sequences(self):
+        """
+        :return: all sequences from this sequence.
+        """
+        def inner(seq, result=[]):
+            if isinstance(seq, Sequences):
+                for s in seq.sequence:
+                    inner(s, result)
+            elif isinstance(seq, Sequence):
+                if len(seq.sequence.strip()) > 1:
+                    result.append(seq.sequence)
+            return result
+        return inner(self, [])
+
+    def size(self):
+        """
+        :return: the number of sequences possibles to generate.
+        """
+        sequences = self.get_sequences()
+        if sequences is None or len(sequences) <= 0:
+            return 0
+        result = 1
+        for seq in sequences:
+            result *= len(seq)
+        return result
+
     def last(self):
         """
         Advance to the last sequence.
