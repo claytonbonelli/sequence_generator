@@ -144,7 +144,10 @@ class Sequences(Sequence):
                     inner(s, result)
             elif isinstance(seq, Sequence):
                 if len(seq.sequence.strip()) > 1:
-                    result.append(seq.sequence)
+                    result.append({
+                        "sequence": seq.sequence,
+                        "index": seq.index,
+                    })
             return result
         return inner(self, [])
 
@@ -157,7 +160,7 @@ class Sequences(Sequence):
             return 0
         result = 1
         for seq in sequences:
-            result *= len(seq)
+            result *= len(seq['sequence'])
         return result
 
     def last(self):
@@ -447,6 +450,4 @@ def factory(pattern, first_value=None):
 
     if first_value is not None:
         result.set(first_value)
-        result.previous()
-
     return result
