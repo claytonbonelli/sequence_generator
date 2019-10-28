@@ -129,10 +129,15 @@ class Sequences(Sequence):
         Sequence ("0123456789"),
     )
     """
-    def __init__(self, sequence, parent=None):
+
+    RIGHT_TO_LEFT = 0
+    LEFT_TO_RIGHT = 1
+
+    def __init__(self, sequence, parent=None, direction=RIGHT_TO_LEFT):
         super().__init__(sequence, parent)
         self.indexes = []
         self.build_indexes()
+        self.direction = direction
 
     def get_sequences(self):
         """
@@ -231,21 +236,35 @@ class Sequences(Sequence):
             for index, idx in enumerate(self.indexes):
                 if self.sequence[idx] != sequence:
                     continue
-                if index > 0:
-                    self.sequence[self.indexes[index - 1]].next()
-                    return self
-                # index == 0
-                self.send_to_parent(flow=flow)
+                if self.direction == self.RIGHT_TO_LEFT:
+                    if index > 0:
+                        self.sequence[self.indexes[index - 1]].next()
+                        return self
+                    # index == 0
+                    self.send_to_parent(flow=flow)
+                elif self.direction == self.LEFT_TO_RIGHT:
+                    if index < (len(self.indexes) - 1):
+                        self.sequence[self.indexes[index + 1]].next()
+                        return self
+                    # index == len(self.indexes)
+                    self.send_to_parent(flow=flow)
 
         elif flow == self.UNDERFLOW:
             for index, idx in enumerate(self.indexes):
                 if self.sequence[idx] != sequence:
                     continue
-                if index > 0:
-                    self.sequence[self.indexes[index - 1]].previous()
-                    return self
-                # index == 0
-                self.send_to_parent(flow=flow)
+                if self.direction == self.RIGHT_TO_LEFT:
+                    if index > 0:
+                        self.sequence[self.indexes[index - 1]].previous()
+                        return self
+                    # index == 0
+                    self.send_to_parent(flow=flow)
+                elif self.direction == self.RIGHT_TO_LEFT:
+                    if index < (len(self.indexes) - 1):
+                        self.sequence[self.indexes[index + 1]].previous()
+                        return self
+                    # index == len(self.indexes)
+                    self.send_to_parent(flow=flow)
         return self
 
     def get(self):
@@ -275,7 +294,10 @@ class Sequences(Sequence):
         :return: self
         """
         if len(self.indexes) > 0:
-            self.sequence[self.indexes[-1]].next()
+            if self.direction == self.RIGHT_TO_LEFT:
+                self.sequence[self.indexes[-1]].next()
+            elif self.direction == self.LEFT_TO_RIGHT:
+                self.sequence[self.indexes[0]].next()
         return self
 
 
@@ -416,7 +438,7 @@ class DnaSequence(Sequences):
         ])
 
 
-def factory(pattern, first_value=None):
+def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT):
     """
     Creates a sequence pattern using a string consisting of constants and regular expressions to represent the sequence
     of values. To create a sequence with the following pattern (including the constant "2019"):
@@ -450,7 +472,7 @@ def factory(pattern, first_value=None):
     if len(pat) <= 0:
         return None
 
-    result = Sequences([])
+    result = Sequences([], direction=direction)
     for x in pat:
         o = list(exrex.generate(x))
         n = len(o)
