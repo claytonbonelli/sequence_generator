@@ -163,6 +163,29 @@ class Sequences(Sequence):
             result *= len(seq['sequence'])
         return result
 
+    def distance_to_last(self):
+        """
+        :return: the distance from the current sequence to the last sequence.
+        """
+        result = 0
+        sequences = self.get_sequences()
+        n = len(sequences)
+        if sequences is None or n <= 0:
+            return 0
+        for i, v in enumerate(sequences):
+            index = v['index']
+            if index < 0:
+                index = 0
+            offset = len(v['sequence']) - index - 1
+            if i < (n - 1):
+                r = offset
+                for k in range((i + 1), n):
+                    r *= len(sequences[k]['sequence'])
+                result += r
+            else:
+                result += offset
+        return result
+
     def last(self):
         """
         Advance to the last sequence.
