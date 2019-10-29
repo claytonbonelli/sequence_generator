@@ -259,7 +259,7 @@ class Sequences(Sequence):
                         return self
                     # index == 0
                     self.send_to_parent(flow=flow)
-                elif self.direction == self.RIGHT_TO_LEFT:
+                elif self.direction == self.LEFT_TO_RIGHT:
                     if index < (len(self.indexes) - 1):
                         self.sequence[self.indexes[index + 1]].previous()
                         return self
@@ -285,8 +285,15 @@ class Sequences(Sequence):
         :return: self
         """
         if len(self.indexes) > 0:
-            self.sequence[self.indexes[-1]].previous()
+            self._get_sequence_to_advance().previous()
         return self
+
+    def _get_sequence_to_advance(self):
+        if self.direction == self.RIGHT_TO_LEFT:
+            return self.sequence[self.indexes[-1]]
+        elif self.direction == self.LEFT_TO_RIGHT:
+            return self.sequence[self.indexes[0]]
+        return None
 
     def next(self):
         """
@@ -294,10 +301,7 @@ class Sequences(Sequence):
         :return: self
         """
         if len(self.indexes) > 0:
-            if self.direction == self.RIGHT_TO_LEFT:
-                self.sequence[self.indexes[-1]].next()
-            elif self.direction == self.LEFT_TO_RIGHT:
-                self.sequence[self.indexes[0]].next()
+            self._get_sequence_to_advance().next()
         return self
 
 
@@ -487,7 +491,10 @@ def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT):
                     if o[idx][x] not in aux:
                         aux.append(o[idx][x])
                 if len(aux) > 0:
-                    result.sequence.append(Sequence("".join(aux)))
+                    if len(aux) > 1:
+                        result.sequence.append(Sequence("".join(aux)))
+                    else:
+                        result.sequence.append(aux[0])
     if len(result.sequence) <= 0:
         return None
 
