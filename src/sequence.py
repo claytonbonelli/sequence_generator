@@ -222,7 +222,7 @@ class Sequences(Sequence):
 
     def send(self, *args, **kwargs):
         """
-        Send a message for this class.
+        Send a message to this class.
         :return: self
         """
         size = len(self.indexes)
@@ -232,39 +232,27 @@ class Sequences(Sequence):
         flow = kwargs.get('flow')
         sequence = args[0]
 
-        if flow == self.OVERFLOW:
-            for index, idx in enumerate(self.indexes):
-                if self.sequence[idx] != sequence:
-                    continue
-                if self.direction == self.RIGHT_TO_LEFT:
-                    if index > 0:
-                        self.sequence[self.indexes[index - 1]].next()
-                        return self
-                    # index == 0
-                    self.send_to_parent(flow=flow)
-                elif self.direction == self.LEFT_TO_RIGHT:
-                    if index < (len(self.indexes) - 1):
-                        self.sequence[self.indexes[index + 1]].next()
-                        return self
-                    # index == len(self.indexes)
-                    self.send_to_parent(flow=flow)
+        method_name = "next" if flow == self.OVERFLOW else "previous"
+        for index, idx in enumerate(self.indexes):
+            if self.sequence[idx] != sequence:
+                continue
 
-        elif flow == self.UNDERFLOW:
-            for index, idx in enumerate(self.indexes):
-                if self.sequence[idx] != sequence:
-                    continue
-                if self.direction == self.RIGHT_TO_LEFT:
-                    if index > 0:
-                        self.sequence[self.indexes[index - 1]].previous()
-                        return self
-                    # index == 0
-                    self.send_to_parent(flow=flow)
-                elif self.direction == self.LEFT_TO_RIGHT:
-                    if index < (len(self.indexes) - 1):
-                        self.sequence[self.indexes[index + 1]].previous()
-                        return self
-                    # index == len(self.indexes)
-                    self.send_to_parent(flow=flow)
+            if self.direction == self.RIGHT_TO_LEFT:
+                if index > 0:
+                    sequence = self.sequence[self.indexes[index - 1]]
+                    getattr(sequence, method_name)()
+                    return self
+                # index == 0
+                self.send_to_parent(flow=flow)
+
+            elif self.direction == self.LEFT_TO_RIGHT:
+                if index < (len(self.indexes) - 1):
+                    sequence = self.sequence[self.indexes[index + 1]]
+                    getattr(sequence, method_name)()
+                    return self
+                # index == len(self.indexes)
+                self.send_to_parent(flow=flow)
+
         return self
 
     def get(self):
