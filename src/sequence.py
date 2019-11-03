@@ -133,11 +133,12 @@ class Sequences(Sequence):
     RIGHT_TO_LEFT = 0
     LEFT_TO_RIGHT = 1
 
-    def __init__(self, sequence, parent=None, direction=RIGHT_TO_LEFT):
+    def __init__(self, sequence, parent=None, direction=RIGHT_TO_LEFT, order=None):
         super().__init__(sequence, parent)
         self.indexes = []
         self.build_indexes()
         self.direction = direction
+        self.order = order
 
     def get_sequences(self):
         """
@@ -220,6 +221,12 @@ class Sequences(Sequence):
             value.parent = self
             self.indexes.append(index)
 
+    def _index_of(self, sequence, indexes):
+        for index, idx in enumerate(indexes):
+            if self.sequence[idx] == sequence:
+                return index
+        return None
+
     def send(self, *args, **kwargs):
         """
         Send a message to this class.
@@ -233,26 +240,31 @@ class Sequences(Sequence):
         sequence = args[0]
 
         method_name = "next" if flow == self.OVERFLOW else "previous"
-        for index, idx in enumerate(self.indexes):
-            if self.sequence[idx] != sequence:
-                continue
 
-            if self.direction == self.RIGHT_TO_LEFT:
-                if index > 0:
-                    sequence = self.sequence[self.indexes[index - 1]]
-                    getattr(sequence, method_name)()
-                    return self
-                # index == 0
-                self.send_to_parent(flow=flow)
+        if self.order and len(self.order) > 1:
+            index = self._index_of(sequence, self.order)
+            if index < (len(self.order) - 1):
+                sequence = self.sequence[self.order[index + 1]]
+                getattr(sequence, method_name)()
+                return self
+            self.send_to_parent(flow=flow)
+            return self
 
-            elif self.direction == self.LEFT_TO_RIGHT:
-                if index < (len(self.indexes) - 1):
-                    sequence = self.sequence[self.indexes[index + 1]]
-                    getattr(sequence, method_name)()
-                    return self
-                # index == len(self.indexes)
-                self.send_to_parent(flow=flow)
-
+        index = self._index_of(sequence, self.indexes)
+        if self.direction == self.RIGHT_TO_LEFT:
+            if index > 0:
+                sequence = self.sequence[self.indexes[index - 1]]
+                getattr(sequence, method_name)()
+                return self
+            # index == 0
+            self.send_to_parent(flow=flow)
+        elif self.direction == self.LEFT_TO_RIGHT:
+            if index < (len(self.indexes) - 1):
+                sequence = self.sequence[self.indexes[index + 1]]
+                getattr(sequence, method_name)()
+                return self
+            # index == len(self.indexes)
+            self.send_to_parent(flow=flow)
         return self
 
     def get(self):
@@ -278,8 +290,12 @@ class Sequences(Sequence):
 
     def _get_sequence_to_advance(self):
         if self.direction == self.RIGHT_TO_LEFT:
+            if self.order and len(self.order) > 1:
+                return self.sequence[self.order[0]]
             return self.sequence[self.indexes[-1]]
         elif self.direction == self.LEFT_TO_RIGHT:
+            if self.order and len(self.order) > 1:
+                return self.sequence[self.order[-1]]
             return self.sequence[self.indexes[0]]
         return None
 
@@ -293,7 +309,7 @@ class Sequences(Sequence):
         return self
 
 
-def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT):
+def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT, order=None):
     """
     Creates a sequence pattern using a string consisting of constants and regular expressions to represent the sequence
     of values. To create a sequence with the following pattern (including the constant "2019"):
@@ -317,7 +333,9 @@ def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT):
     s = factory ("[A-Z];-2019-;[0-9];[0-9]")
 
     :param pattern: the pattern to create the sequence.
-    :param first_value: the first value fo the sequence.
+    :param first_value: the first value of the sequence.
+    :param direction: the direction of the sequence.
+    :param order: the growing order of the sequence.
     :return: the instance of the class Sequences.
     """
     if pattern is None:
@@ -327,7 +345,7 @@ def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT):
     if len(pat) <= 0:
         return None
 
-    result = Sequences([], direction=direction)
+    result = Sequences([], direction=direction, order=order)
     for x in pat:
         o = list(exrex.generate(x))
         n = len(o)
