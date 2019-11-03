@@ -139,6 +139,17 @@ class Sequences(Sequence):
         self.build_indexes()
         self.direction = direction
         self.order = order
+        self.check_order()
+
+    def check_order(self):
+        if self.sequence is None or len(self.sequence) <= 0:
+            return
+        if self.order is None or len(self.order) <= 0:
+            return
+        for o in self.order:
+            seq = self.sequence[o]
+            if not isinstance(seq, Sequence):
+                raise Exception('order at [{index}] is not a Sequence'.format(index=o))
 
     def get_sequences(self):
         """
@@ -240,31 +251,25 @@ class Sequences(Sequence):
         sequence = args[0]
 
         method_name = "next" if flow == self.OVERFLOW else "previous"
+        index = self._index_of(sequence, self.indexes)
 
-        if self.order and len(self.order) > 1:
+        if self.order and len(self.order) > 0:
             index = self._index_of(sequence, self.order)
             if index < (len(self.order) - 1):
                 sequence = self.sequence[self.order[index + 1]]
                 getattr(sequence, method_name)()
                 return self
-            self.send_to_parent(flow=flow)
-            return self
-
-        index = self._index_of(sequence, self.indexes)
-        if self.direction == self.RIGHT_TO_LEFT:
+        elif self.direction == self.RIGHT_TO_LEFT:
             if index > 0:
                 sequence = self.sequence[self.indexes[index - 1]]
                 getattr(sequence, method_name)()
                 return self
-            # index == 0
-            self.send_to_parent(flow=flow)
         elif self.direction == self.LEFT_TO_RIGHT:
             if index < (len(self.indexes) - 1):
                 sequence = self.sequence[self.indexes[index + 1]]
                 getattr(sequence, method_name)()
                 return self
-            # index == len(self.indexes)
-            self.send_to_parent(flow=flow)
+        self.send_to_parent(flow=flow)
         return self
 
     def get(self):
@@ -289,13 +294,11 @@ class Sequences(Sequence):
         return self
 
     def _get_sequence_to_advance(self):
-        if self.direction == self.RIGHT_TO_LEFT:
-            if self.order and len(self.order) > 1:
-                return self.sequence[self.order[0]]
+        if self.order and len(self.order) > 0:
+            return self.sequence[self.order[0]]
+        elif self.direction == self.RIGHT_TO_LEFT:
             return self.sequence[self.indexes[-1]]
         elif self.direction == self.LEFT_TO_RIGHT:
-            if self.order and len(self.order) > 1:
-                return self.sequence[self.order[-1]]
             return self.sequence[self.indexes[0]]
         return None
 
@@ -369,6 +372,10 @@ def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT, order=
 
     result.build_indexes()
 
+    if order and len(order) > 0:
+        result.check_order()
+
     if first_value is not None:
         result.set(first_value)
+
     return result
