@@ -334,6 +334,7 @@ def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT, order=
     A-2019-00
     A-2019-01
     A-2019-02
+    ...
     A-2019-99
     B-2019-00
     B-2019-01
