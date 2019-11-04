@@ -149,7 +149,9 @@ class Sequences(Sequence):
         for o in self.order:
             seq = self.sequence[o]
             if not isinstance(seq, Sequence):
-                raise Exception('order at [{index}] is not a Sequence'.format(index=o))
+                raise Exception('order at [{index}] is not a Sequence, please use only the indexes {values}'.format(
+                    index=o, values=self.indexes,
+                ))
 
     def get_sequences(self):
         """
@@ -315,7 +317,19 @@ class Sequences(Sequence):
 def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT, order=None):
     """
     Creates a sequence pattern using a string consisting of constants and regular expressions to represent the sequence
-    of values. To create a sequence with the following pattern (including the constant "2019"):
+    of values.
+
+    :param pattern: the pattern to create the sequence.
+    :param first_value: the first value of the sequence.
+    :param direction: the direction of the sequence.
+    :param order: the sequence growth order.
+    :return: the instance of the class Sequences.
+
+    Examples: the following snippets will generate the sequences:
+
+    s = factory ("[A-Z]-2019-[0-9][0-9]")
+    for x in range(300):
+        print(s.next().get())
 
     A-2019-00
     A-2019-01
@@ -331,15 +345,66 @@ def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT, order=
     Z-2019-98
     Z-2019-99
 
-    Just run the following code
+    s = factory ("[A-Z]-2019-[0-9][0-9]", direction=Sequences.LEFT_TO_RIGHT)
+    for x in range(300):
+        print(s.next().get())
 
-    s = factory ("[A-Z];-2019-;[0-9];[0-9]")
+    A-2019-00
+    B-2019-00
+    C-2019-00
+    D-2019-00
+    E-2019-00
+    ...
+    X-2019-00
+    Y-2019-00
+    Z-2019-00
+    A-2019-10
+    B-2019-10
+    C-2019-10
+    ...
+    X-2019-10
+    Y-2019-10
+    Z-2019-10
+    A-2019-20
+    B-2019-20
+    C-2019-20
+    ...
+    X-2019-90
+    Y-2019-90
+    Z-2019-90
+    A-2019-01
+    B-2019-01
+    C-2019-01
 
-    :param pattern: the pattern to create the sequence.
-    :param first_value: the first value of the sequence.
-    :param direction: the direction of the sequence.
-    :param order: the growing order of the sequence.
-    :return: the instance of the class Sequences.
+    s = factory("[A-Z]-2019-[0-9][0-9]", order=[8, 0, 7])
+    for x in range(300):
+        print(s.next().get())
+
+    A-2019-00
+    A-2019-01
+    A-2019-02
+    A-2019-03
+    A-2019-04
+    A-2019-05
+    A-2019-06
+    A-2019-07
+    A-2019-08
+    A-2019-09
+    B-2019-00
+    B-2019-01
+    B-2019-02
+    B-2019-03
+    B-2019-04
+    ...
+    Z-2019-07
+    Z-2019-08
+    Z-2019-09
+    A-2019-10
+    A-2019-11
+    A-2019-12
+    A-2019-13
+    A-2019-14
+
     """
     if pattern is None:
         return None
@@ -357,11 +422,11 @@ def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT, order=
         elif n > 1 and len(o[0]) == 1:
             result.sequence.append(Sequence("".join(o)))
         elif n > 1 and len(o[0]) > 1:
-            for x in range(len(o[0])):
+            for y in range(len(o[0])):
                 aux = []
                 for idx in range(len(o)):
-                    if o[idx][x] not in aux:
-                        aux.append(o[idx][x])
+                    if o[idx][y] not in aux:
+                        aux.append(o[idx][y])
                 if len(aux) > 0:
                     if len(aux) > 1:
                         result.sequence.append(Sequence("".join(aux)))
