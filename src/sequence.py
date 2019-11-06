@@ -139,19 +139,22 @@ class Sequences(Sequence):
         self.build_indexes()
         self.direction = direction
         self.order = order
-        self.check_order()
+        self.check_order(order)
 
-    def check_order(self):
+    def check_order(self, order):
         if self.sequence is None or len(self.sequence) <= 0:
             return
-        if self.order is None or len(self.order) <= 0:
+        if order is None or len(order) <= 0:
             return
-        for o in self.order:
-            seq = self.sequence[o]
-            if not isinstance(seq, Sequence):
-                raise Exception('order at [{index}] is not a Sequence, please use only the indexes {values}'.format(
-                    index=o, values=self.indexes,
-                ))
+        for o in order:
+            if type(o) == list:
+                self.check_order(o)
+            else:
+                seq = self.sequence[o]
+                if not isinstance(seq, Sequence):
+                    raise Exception('order at [{index}] is not a Sequence, please use only the indexes {values}'.format(
+                        index=o, values=self.indexes,
+                    ))
 
     def get_sequences(self):
         """
@@ -240,6 +243,16 @@ class Sequences(Sequence):
                 return index
         return None
 
+    def _index_of_order(self, sequence, order):
+        for index, idx in enumerate(order):
+            if type(idx) == list:
+                r1, r2, r3 = self._index_of_order(sequence, idx)
+                if r1 is not None:
+                    return r1, r2, index
+            elif self.sequence[idx] == sequence:
+                return index, order, None
+        return None, None, None
+
     def send(self, *args, **kwargs):
         """
         Send a message to this class.
@@ -256,21 +269,28 @@ class Sequences(Sequence):
         index = self._index_of(sequence, self.indexes)
 
         if self.order and len(self.order) > 0:
-            index = self._index_of(sequence, self.order)
-            if index < (len(self.order) - 1):
-                sequence = self.sequence[self.order[index + 1]]
+            index, order, group_index = self._index_of_order(sequence, self.order)
+            if index is not None and order is not None and index < (len(order) - 1):
+                sequence = self.sequence[order[index + 1]]
                 getattr(sequence, method_name)()
                 return self
-        elif self.direction == self.RIGHT_TO_LEFT:
-            if index > 0:
-                sequence = self.sequence[self.indexes[index - 1]]
+            elif group_index is not None and group_index < (len(self.order) - 1):
+                order = self.order[group_index + 1]
+                index = self._get_first_value_from_order(order)
+                sequence = self.sequence[index]
                 getattr(sequence, method_name)()
                 return self
-        elif self.direction == self.LEFT_TO_RIGHT:
-            if index < (len(self.indexes) - 1):
-                sequence = self.sequence[self.indexes[index + 1]]
-                getattr(sequence, method_name)()
-                return self
+        else:
+            if self.direction == self.RIGHT_TO_LEFT:
+                if index > 0:
+                    sequence = self.sequence[self.indexes[index - 1]]
+                    getattr(sequence, method_name)()
+                    return self
+            elif self.direction == self.LEFT_TO_RIGHT:
+                if index < (len(self.indexes) - 1):
+                    sequence = self.sequence[self.indexes[index + 1]]
+                    getattr(sequence, method_name)()
+                    return self
         self.send_to_parent(flow=flow)
         return self
 
@@ -295,9 +315,18 @@ class Sequences(Sequence):
             self._get_sequence_to_advance().previous()
         return self
 
+    def _get_first_value_from_order(self, order):
+        if order is None or len(order) <= 0:
+            return None
+        result = order[0]
+        if type(result) == list:
+            return self._get_first_value_from_order(result)
+        return result
+
     def _get_sequence_to_advance(self):
         if self.order and len(self.order) > 0:
-            return self.sequence[self.order[0]]
+            index = self._get_first_value_from_order(self.order)
+            return self.sequence[index]
         elif self.direction == self.RIGHT_TO_LEFT:
             return self.sequence[self.indexes[-1]]
         elif self.direction == self.LEFT_TO_RIGHT:
@@ -310,7 +339,8 @@ class Sequences(Sequence):
         :return: self
         """
         if len(self.indexes) > 0:
-            self._get_sequence_to_advance().next()
+            sequence = self._get_sequence_to_advance()
+            sequence.next()
         return self
 
 
@@ -439,7 +469,7 @@ def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT, order=
     result.build_indexes()
 
     if order and len(order) > 0:
-        result.check_order()
+        result.check_order(order)
 
     if first_value is not None:
         result.set(first_value)
