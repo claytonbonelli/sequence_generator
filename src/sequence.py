@@ -450,6 +450,36 @@ def factory(pattern, first_value=None, direction=Sequences.RIGHT_TO_LEFT, order=
     A-2019-13
     A-2019-14
 
+    s = factory("[0-9]{2} [0-9]{2}", order=[[1, 0], [4, 3]])
+    for x in range(1000):
+        print(s.next().get())
+
+    00 00
+    01 00
+    02 00
+    03 00
+    04 00
+    05 00
+    06 00
+    07 00
+    08 00
+    09 00
+    10 00
+    11 00
+    12 00
+    13 00
+    14 00
+    ...
+    97 00
+    98 00
+    99 00
+    00 01
+    01 01
+    02 01
+    03 01
+    04 01
+    05 01
+
     """
     if pattern is None:
         return None
