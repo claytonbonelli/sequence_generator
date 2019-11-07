@@ -244,14 +244,28 @@ class Sequences(Sequence):
         return None
 
     def _index_of_order(self, sequence, order):
-        for index, idx in enumerate(order):
-            if type(idx) == list:
-                r1, r2, r3 = self._index_of_order(sequence, idx)
-                if r1 is not None:
-                    return r1, r2, index
-            elif self.sequence[idx] == sequence:
-                return index, order, None
-        return None, None, None
+        result1 = result2 = result3 = result4 = None
+
+        def inner(values):
+            nonlocal result1, result2, result3, result4
+            for index, idx in enumerate(values):
+                if type(idx) == list:
+                    r1, r2, r3, r4 = inner(idx)
+                    if result1 is None:
+                        result1 = r1
+                    if result1 is not None and result2 is None:
+                        result2 = r2
+                    if result1 is not None and result3 is None:
+                        result3 = r3 or index if len(values) > 1 else None
+                    if result1 is not None and result4 is None:
+                        result4 = r4 or order if len(values) > 1 else None
+                elif self.sequence[idx] == sequence:
+                    result1 = index
+                    result2 = values
+                    return result1, result2, result3, result4
+            return result1, result2, result3, result4
+        inner(order)
+        return result1, result2, result3, result4
 
     def send(self, *args, **kwargs):
         """
@@ -269,13 +283,13 @@ class Sequences(Sequence):
         index = self._index_of(sequence, self.indexes)
 
         if self.order and len(self.order) > 0:
-            index, order, group_index = self._index_of_order(sequence, self.order)
+            index, order, group_index, group_values = self._index_of_order(sequence, self.order)
             if index is not None and order is not None and index < (len(order) - 1):
                 sequence = self.sequence[order[index + 1]]
                 getattr(sequence, method_name)()
                 return self
-            elif group_index is not None and group_index < (len(self.order) - 1):
-                order = self.order[group_index + 1]
+            elif group_index is not None and group_index < (len(group_values) - 1):
+                order = group_values[group_index + 1]
                 index = self._get_first_value_from_order(order)
                 sequence = self.sequence[index]
                 getattr(sequence, method_name)()
