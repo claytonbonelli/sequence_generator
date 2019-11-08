@@ -19,7 +19,7 @@ class Sequence:
         self.index = -1
         self.parent = parent
 
-    def send(self, *args, **kwargs):
+    def _send(self, *args, **kwargs):
         """
         Send a message for this class.
         :return: self
@@ -42,13 +42,13 @@ class Sequence:
         self.index = 0
         return self
 
-    def send_to_parent(self, *args, **kwargs):
+    def _send_to_parent(self, *args, **kwargs):
         """
         Send a message for the parent.
         :return: self
         """
         if self.parent:
-            self.parent.send(self, *args, **kwargs)
+            self.parent._send(self, *args, **kwargs)
         return self
 
     def set(self, value):
@@ -85,7 +85,7 @@ class Sequence:
         if self.index >= 0:
             return self
         self.index = size - 1
-        self.send_to_parent(flow=self.UNDERFLOW)
+        self._send_to_parent(flow=self.UNDERFLOW)
         return self
 
     def next(self):
@@ -97,7 +97,7 @@ class Sequence:
         if self.index < len(self.sequence):
             return self
         self.index = 0
-        self.send_to_parent(flow=self.OVERFLOW)
+        self._send_to_parent(flow=self.OVERFLOW)
         return self
 
 
@@ -146,15 +146,15 @@ class Sequences(Sequence):
             return
         if order is None or len(order) <= 0:
             return
+
+        msg = 'order at [{index}] is not a Sequence, please use only the indexes {values}'
         for o in order:
             if type(o) == list:
                 self.check_order(o)
-            else:
-                seq = self.sequence[o]
-                if not isinstance(seq, Sequence):
-                    raise Exception('order at [{index}] is not a Sequence, please use only the indexes {values}'.format(
-                        index=o, values=self.indexes,
-                    ))
+                continue
+            seq = self.sequence[o]
+            if not isinstance(seq, Sequence):
+                raise Exception(msg.format(index=o, values=self.indexes))
 
     def get_sequences(self):
         """
@@ -231,6 +231,7 @@ class Sequences(Sequence):
     def build_indexes(self):
         if self.sequence is None or len(self.sequence) <= 0:
             return
+        self.indexes = []
         for index, value in enumerate(self.sequence):
             if not isinstance(value, Sequence):
                 continue
@@ -267,7 +268,7 @@ class Sequences(Sequence):
         inner(order)
         return result1, result2, result3, result4
 
-    def send(self, *args, **kwargs):
+    def _send(self, *args, **kwargs):
         """
         Send a message to this class.
         :return: self
@@ -305,7 +306,7 @@ class Sequences(Sequence):
                     sequence = self.sequence[self.indexes[index + 1]]
                     getattr(sequence, method_name)()
                     return self
-        self.send_to_parent(flow=flow)
+        self._send_to_parent(flow=flow)
         return self
 
     def get(self):
