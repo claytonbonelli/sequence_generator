@@ -54,25 +54,18 @@ You can create your own sequences or use the predefined ones.
 Example:
 
 ```python
-s = Sequences([TwoAlphabeticalSequence(), '-', FourDecimalSequence()])
-for x in range(100):
-    print(s.next().get())
-
-
-s = Sequences([AlphabeticalSequence(), '-', '2019', '-', TwoDecimalSequence()])
-for x in range(100):
-    print(s.next().get())
-
-
-s = Sequences([DnaSequence(), '-', DnaSequence(), '-', DnaSequence()])
-while s.next().get() != 'AAA-AAC-GTA':
-    print(s.get())    
-print(s.get())
-
-
-seq = factory("WM;[0-9];[0-9]")
+seq = factory("WM [0-9][0-9]")
 for x in range(100):
     print(seq.next().get())
+    
+seq = factory("WM [0-9]{2}")
+for x in range(100):
+    print(seq.next().get())
+    
+seq = factory("WM [0-9]{2}", order=[0, 1])
+for x in range(100):
+    print(seq.next().get())
+    
 ```
 
 ### Dependencies:
