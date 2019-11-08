@@ -138,7 +138,7 @@ class Sequences(Sequence):
         self.indexes = []
         self.build_indexes()
         self.direction = direction
-        self.order = order
+        self.order = self._makeit_plain(order)
         self.check_order(order)
 
     def check_order(self, order):
@@ -146,7 +146,6 @@ class Sequences(Sequence):
             return
         if order is None or len(order) <= 0:
             return
-
         msg = 'order at [{index}] is not a Sequence, please use only the indexes {values}'
         for o in order:
             if type(o) == list:
@@ -155,6 +154,25 @@ class Sequences(Sequence):
             seq = self.sequence[o]
             if not isinstance(seq, Sequence):
                 raise Exception(msg.format(index=o, values=self.indexes))
+
+    def _makeit_plain(self, values):
+        if values is None or len(values) <= 0:
+            return None
+
+        result = []
+
+        def inner(values):
+            nonlocal result
+            if values is None or len(values) <= 0:
+                return None
+            for value in values:
+                if type(value) == list:
+                    inner(value)
+                else:
+                    result.append(value)
+
+        inner(values)
+        return result
 
     def get_sequences(self):
         """

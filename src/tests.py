@@ -8,6 +8,22 @@ class MyTestCase(unittest.TestCase):
         seq = factory("[ABC]{2} [0-9]{2}")
         self.assertEqual(type(seq), Sequences)
 
+    def test_order_is_plain(self):
+        seq = factory("[ABC]{2} [0-9]{2}", order=[1, 0, 4, 3])
+        self.assertEqual(seq.order, [1, 0, 4, 3])
+
+        seq = factory("[ABC]{2} [0-9]{2}", order=[[1, 0, 4, 3]])
+        self.assertEqual(seq.order, [1, 0, 4, 3])
+
+        seq = factory("[ABC]{2} [0-9]{2}", order=[[[[[[1, 0, 4, 3]]]]]])
+        self.assertEqual(seq.order, [1, 0, 4, 3])
+
+        seq = factory("[ABC]{2} [0-9]{2}", order=[[1, 0], [4, 3]])
+        self.assertEqual(seq.order, [1, 0, 4, 3])
+
+        seq = factory("[ABC]{2} [0-9]{2}", order=[[1, [0]], [4], [3]])
+        self.assertEqual(seq.order, [1, 0, 4, 3])
+
     def test_get_sequences(self):
         seq = factory("[ABC]{2} [0-9]{2}")
         sequences = seq.get_sequences()
