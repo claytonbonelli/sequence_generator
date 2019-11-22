@@ -54,36 +54,20 @@ You can create your own sequences or use the predefined ones.
 Example:
 
 ```python
-s = Sequences([TwoAlphabeticalSequence(), '-', FourDecimalSequence()])
-for x in range(100):
-    print(s.next().get())
-
-
-s = Sequences([AlphabeticalSequence(), '-', '2019', '-', TwoDecimalSequence()])
-for x in range(100):
-    print(s.next().get())
-
-
-s = Sequences([DnaSequence(), '-', DnaSequence(), '-', DnaSequence()])
-while s.next().get() != 'AAA-AAC-GTA':
-    print(s.get())    
-print(s.get())
-
-
-seq = factory("WM;[0-9];[0-9]")
+seq = factory("WM [0-9][0-9]")
 for x in range(100):
     print(seq.next().get())
+    
+seq = factory("WM [0-9]{2}")
+for x in range(100):
+    print(seq.next().get())
+    
+seq = factory("WM [0-9]{2}", order=[0, 1])
+for x in range(100):
+    print(seq.next().get())
+    
 ```
 
 ### Dependencies:
    * exrex
 
-
-### Methods:
-   * previous: return to the previous sequence
-   * next: advance to the next sequence
-   * last: advance to the last sequence
-   * first: return to the first sequence
-   * get: return the current sequence's value
-   * set: set the current sequence's value   
-   * factory: create a sequence using regex 
