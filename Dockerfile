@@ -13,7 +13,7 @@ RUN apk --update --no-cache add \
     --virtual build-deps gcc python3-dev musl-dev \
   && rm -rf /var/cache/apk/*
 
-ADD src/requirements.txt /app/src/
+ADD sequence_generator /app/src/
 
 WORKDIR /app/src
 

@@ -1,6 +1,6 @@
 import pytest
 
-from src.sequence import factory, Sequences
+from sequence_generator.sequence import factory, Sequences
 
 
 class TestAgroceres:
